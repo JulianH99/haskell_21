@@ -3,14 +3,13 @@
 module Main where
 
 import System.Random
-import System.Random.Shuffle (shuffle')
 
 
 
-data CardType =  Diamond | Club | Heart | Spade deriving Show
+data CardType =  Diamond | Club | Heart | Spade deriving (Show, Eq)
     
 -- 
-typeLenght = [1..14]
+typeLength = [1..14]
 
 -- 
 cardTypeList = [Diamond, Club, Heart, Spade]
@@ -18,11 +17,15 @@ cardTypeList = [Diamond, Club, Heart, Spade]
 data Card = Card {
     value   :: Int,
     ctype    :: CardType
-} deriving Show
+} deriving (Show, Eq)
 
+cprint::String->IO ()
+cprint str = do 
+    putStr str
+    putStr "\n"
 
-getRandomNumber :: IO Int
-getRandomNumber = randomRIO (1, 56)
+getRandomNumber :: Int -> Int -> IO Int
+getRandomNumber a b = randomRIO (a, b)
 
 
 generateDeck :: [CardType] -> [Card]
@@ -31,7 +34,7 @@ generateDeck types = generateCardsOfType (head types) ++ generateDeck (tail type
 
 
 generateCardsOfType :: CardType -> [Card]
-generateCardsOfType cardtype = [ Card x cardtype | x <- typeLenght]
+generateCardsOfType cardtype = [ if x < 10 then Card x cardtype else Card 10 cardtype | x <- typeLength ]
 
 
 getCardFrom :: [Card] -> Int -> Card
@@ -41,11 +44,34 @@ getCardFrom cards pos = cards!!pos
 cardList :: [Card]
 cardList = generateDeck cardTypeList
 
--- main = do
-    
-twentyone = do
-    stdgen <- newStdGen
-    shuffle' cardList (length cardList) stdgen
+getCardFromMaze :: [Card] -> Int -> Card
+getCardFromMaze maze position = maze !! position
+
+removeCard :: [Card] -> Card -> [Card]
+removeCard maze card = [x | x <- maze, x /= card]
+
+addCard :: [Card] -> Card -> [Card]
+addCard maze card = [card] ++ maze
+
+sumMaze :: [Card] -> Int
+sumMaze [] = 0
+sumMaze ((Card value _):xs) = value + (sumMaze xs)
 
 
-main = putStrLn "Hello to 21 game"
+finalSum :: Int -> [Card] -> Int
+finalSum sum cards 
+    | sum + 10 < 21 && length cards > 0 = finalSum (sum+10) tailcards
+    | otherwise = sum
+    where tailcards = tail cards
+
+getOnes :: [Card] -> [Card]
+getOnes cards = filter ( ( == 1) . value ) cards
+
+
+
+casino:: [Card] -> [Card] -> [Card] -> IO()
+casino cards pcards mcards = do
+    cprint "Welcome to the casino :)"
+
+
+main = casino cardList [] []
