@@ -19,7 +19,7 @@ data Card = Card {
     ctype    :: CardType
 } deriving (Show, Eq)
 
-cprint::String->IO ()
+cprint::String-> IO()
 cprint str = do 
     putStr str
     putStr "\n"
@@ -35,10 +35,6 @@ generateDeck types = generateCardsOfType (head types) ++ generateDeck (tail type
 
 generateCardsOfType :: CardType -> [Card]
 generateCardsOfType cardtype = [ if x < 10 then Card x cardtype else Card 10 cardtype | x <- typeLength ]
-
-
-getCardFrom :: [Card] -> Int -> Card
-getCardFrom cards pos = cards!!pos
 
 
 cardList :: [Card]
@@ -73,5 +69,10 @@ casino:: [Card] -> [Card] -> [Card] -> IO()
 casino cards pcards mcards = do
     cprint "Welcome to the casino :)"
 
+    cprint "Player takes card"
+    x <- getRandomNumber 0 (length cards - 1)
+    addCard pcards $ getCardFromMaze cards x
+
+    cprint "end game"
 
 main = casino cardList [] []
